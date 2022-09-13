@@ -1,0 +1,33 @@
+---
+- name: Delete legacy node-exporter daemon
+  ansible.builtin.file:
+    path: /etc/systemd/system/node-exporter.service
+    state: absent
+
+- name: Stop legacy node-exporter daemon
+  ansible.builtin.service:
+    name: node-exporter
+    state: stopped
+    enabled: false
+    daemon_reload: true
+  failed_when: false
+
+- name: Install node-exporter
+  ansible.builtin.package:
+    name: prometheus-node-exporter
+    state: present
+
+- name: Make node-exporter compatible with molecule container
+  ansible.builtin.lineinfile:
+    path: /lib/systemd/system/prometheus-node-exporter.service
+    state: absent
+    regexp: SendSIGKILL=no
+  when: ansible_virtualization_type == 'docker'
+
+- name: Enable node-exporter daemon
+  ansible.builtin.service:
+    name: prometheus-node-exporter
+    state: started
+    daemon_reload: true
+    enabled: true
+...

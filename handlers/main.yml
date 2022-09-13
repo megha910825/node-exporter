@@ -1,0 +1,8 @@
+---
+- name: restart_node_exporter
+  service:
+    name: node-exporter
+    state: restarted
+    daemon_reload: true
+    enabled: true
+...
